@@ -1,44 +1,97 @@
 # IMS LTI
 
-[![Build Status](https://travis-ci.org/instructure/ims-lti.svg?branch=2.1.x)](https://travis-ci.org/instructure/ims-lti)
+Ruby library for creating IMS LTI tool providers and consumers.
 
-LTI ruby implementation
+## Requirements
+
+This version targets Ruby 4.0.3 or newer.
+
+The gem does not depend on Rails at runtime, but it is compatible with Rails
+8.1.3. Rails applications can use the plain Ruby service and model APIs exposed
+by this gem.
+
+Runtime dependencies are maintained in `ims-lti.gemspec`:
+
+- `addressable ~> 2.9`
+- `builder ~> 3.3`
+- `faraday ~> 2.14`
+- `json-jwt ~> 1.17`
+- `rexml ~> 3.4`
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
-    gem 'ims-lti'
+```ruby
+gem 'ims-lti'
+```
 
 And then execute:
 
-    $ bundle
+```sh
+bundle
+```
 
 Or install it yourself as:
 
-    $ gem install lti
+```sh
+gem install ims-lti
+```
 
 ## Usage
-
 
 ### LTI 1.x
 
 #### Validating Launches
 
-You can use the classes in the IMS::LTI::Models::Messages module to valdiate Launches
+Use the classes in the `IMS::LTI::Models::Messages` module to validate
+launches.
 
-For example in a rails app you would do the following
+For example, in a Rails application:
+
 ```ruby
-authenticator = IMS::LTI::Services::MessageAuthenticator.new(request.url, request.request_parameters, shared_secret)
+authenticator = IMS::LTI::Services::MessageAuthenticator.new(
+  request.url,
+  request.request_parameters,
+  shared_secret
+)
 
-#Check if the signature is valid
 return false unless authenticator.valid_signature?
 
 # check if `params['oauth_nonce']` has already been used
 
-#check if the message is too old
-return false if DateTime.strptime(request.request_parameters['oauth_timestamp'],'%s') < 5.minutes.ago
+# check if the message is too old
+timestamp = DateTime.strptime(request.request_parameters['oauth_timestamp'], '%s')
+return false if timestamp < 5.minutes.ago
+```
 
+## Development
+
+Use Ruby 4.0.3:
+
+```sh
+rvm use 4.0.3
+bundle install
+```
+
+Run the test suite:
+
+```sh
+bundle exec rspec
+```
+
+Generate a coverage report:
+
+```sh
+COVERAGE=1 bundle exec rspec
+```
+
+The HTML coverage report is generated at `coverage/index.html`.
+
+Build the gem:
+
+```sh
+bundle exec rake build
 ```
 
 ## Contributing

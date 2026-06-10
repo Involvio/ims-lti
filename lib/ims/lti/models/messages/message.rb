@@ -1,3 +1,5 @@
+require 'uri'
+
 module IMS::LTI::Models::Messages
   class Message
 
@@ -166,7 +168,7 @@ module IMS::LTI::Models::Messages
       # signature needs to match, and signature generation does not add carriage
       # returns, so we ensure CRLF endings here.
       message_params = self.class.convert_param_values_to_crlf_endings(oauth_params.merge(post_params))
-      @message_authenticator = IMS::LTI::Services::MessageAuthenticator.new(launch_url, message_params, secret)
+      @message_authenticator = IMS::LTI::Services::MessageAuthenticator.new(normalized_launch_url, message_params, secret)
       @message_authenticator.signed_params
     end
 
@@ -233,6 +235,13 @@ module IMS::LTI::Models::Messages
         h[param.to_s] = value if value
         h
       end
+    end
+
+    def normalized_launch_url
+      uri = URI.parse(launch_url.to_s)
+      uri.scheme = uri.scheme.downcase if uri.scheme
+      uri.host = uri.host.downcase if uri.host
+      uri.to_s
     end
 
   end
