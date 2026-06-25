@@ -1,6 +1,7 @@
+require 'cgi'
+require 'uri'
+
 module IMS::LTI::Models
-    require 'uri'
-  
   class LTIModel
     LTI_VERSION_2P0 = 'LTI-2p0'.freeze
     LTI_VERSION_2P1 = 'LTI-2p1'.freeze
@@ -96,7 +97,7 @@ module IMS::LTI::Models
       begin
         data = JSON.parse(json)
       rescue
-        data = JSON.parse(URI.unescape(json))
+        data = JSON.parse(CGI.unescape(json))
       end
 
       if data.is_a? Array

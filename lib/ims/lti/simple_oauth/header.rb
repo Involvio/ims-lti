@@ -1,7 +1,6 @@
 require 'openssl'
 require 'uri'
 require 'base64'
-require 'cgi'
 
 module IMS::LTI::SimpleOAuth
   class Header
@@ -49,6 +48,7 @@ module IMS::LTI::SimpleOAuth
       @method = method.to_s.upcase
       @uri = URI.parse(url.to_s)
       @uri.scheme = @uri.scheme.downcase
+      @uri.host = @uri.host.downcase if @uri.host
       @uri.normalize!
       @uri.fragment = nil
       @params = params
@@ -123,7 +123,11 @@ module IMS::LTI::SimpleOAuth
     end
 
     def url_params
-      CGI.parse(@uri.query || '').inject([]) { |p, (k, vs)| p + vs.sort.collect { |v| [k, v] } }
+      return [] unless @uri.query
+
+      URI.decode_www_form(@uri.query)
+         .group_by { |key, _| key }
+         .flat_map { |key, values| values.map(&:last).sort.map { |value| [key, value] } }
     end
 
     def rsa_sha1_signature
